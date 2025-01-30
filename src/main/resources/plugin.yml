@@ -13,7 +13,7 @@ author: d0by
 #    aliases: [dh, holograms, hologram, holo]
 #    usage: "/decentholograms <args>"
 #    description: "The main command of DecentHolograms plugin."
-
+folia-supported: true
 permissions:
   #
   # Main permissions

@@ -61,7 +61,7 @@ public class HologramItem {
             }
 
             if (enchanted) {
-                itemBuilder.withUnsafeEnchantment(Enchantment.DURABILITY, 1);
+                itemBuilder.withUnsafeEnchantment(Enchantment.AQUA_AFFINITY, 1);
             }
 
             ItemStack itemStack = itemBuilder.toItemStack();

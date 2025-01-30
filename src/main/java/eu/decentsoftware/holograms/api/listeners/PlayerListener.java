@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.tjdev.util.tjpluginutil.spigot.FoliaUtil;
 
 public class PlayerListener implements Listener {
 
@@ -25,7 +26,7 @@ public class PlayerListener implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
         S.async(() -> decentHolograms.getHologramManager().updateVisibility(player));
-        S.sync(() -> decentHolograms.getPacketListener().hook(player), 20L);
+        FoliaUtil.scheduler.runTaskLater(player, () -> decentHolograms.getPacketListener().hook(player), 20L);
         if (decentHolograms.isUpdateAvailable() && player.hasPermission("dh.admin")) {
             Lang.sendUpdateMessage(player);
         }
@@ -35,7 +36,7 @@ public class PlayerListener implements Listener {
     public void onQuit(PlayerQuitEvent e) {
         Player player = e.getPlayer();
         S.async(() -> decentHolograms.getHologramManager().onQuit(player));
-        S.sync(() -> decentHolograms.getPacketListener().unhook(player));
+        FoliaUtil.scheduler.runTask(player, () -> decentHolograms.getPacketListener().unhook(player));
     }
 
     // TODO: All holograms (and entities) get hidden on the client, when the client

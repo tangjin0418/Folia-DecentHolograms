@@ -4,12 +4,13 @@ import eu.decentsoftware.holograms.api.utils.DExecutor;
 import eu.decentsoftware.holograms.api.utils.Log;
 import eu.decentsoftware.holograms.api.utils.collection.DList;
 import eu.decentsoftware.holograms.api.utils.scheduler.S;
+import org.tjdev.util.tjpluginutil.spigot.scheduler.universalscheduler.scheduling.tasks.MyScheduledTask;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Ticker {
 
-    private final int taskId;
+    private final MyScheduledTask taskId;
     private final AtomicLong ticks;
     private final DList<ITicked> tickedObjects;
     private final DList<ITicked> newTickedObjects;
@@ -27,14 +28,14 @@ public class Ticker {
         this.performingTick = false;
         this.taskId = S.asyncTask(() -> {
             if (!performingTick) tick();
-        }, 1L, 5L).getTaskId();
+        }, 1L, 5L);
     }
 
     /**
      * Stop the ticker and unregister all ticked objects.
      */
     public void destroy() {
-        S.stopTask(taskId);
+        taskId.cancel();
         tickedObjects.clear();
         newTickedObjects.clear();
         removeTickedObjects.clear();

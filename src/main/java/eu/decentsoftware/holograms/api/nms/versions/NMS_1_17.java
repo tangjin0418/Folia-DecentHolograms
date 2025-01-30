@@ -500,7 +500,7 @@ public class NMS_1_17 extends NMS {
 
         List<Object> dataWatcherItems = new ArrayList<>();
         dataWatcherItems.add(DATA_WATCHER_ITEM_CONSTRUCTOR.newInstance(DWO_ITEM, CRAFT_ITEM_NMS_COPY_METHOD.invokeStatic(itemStack)));
-        showFakeEntity(player, location, getEntityTypeId(EntityType.DROPPED_ITEM), entityId);
+        showFakeEntity(player, location, getEntityTypeId(EntityType.valueOf("DROPPED_ITEM")), entityId);
         sendEntityMetadata(player, entityId, dataWatcherItems);
         teleportFakeEntity(player, location, entityId);
     }

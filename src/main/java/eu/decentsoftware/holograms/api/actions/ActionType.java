@@ -16,6 +16,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.tjdev.util.tjpluginutil.spigot.FoliaUtil;
 
 import java.util.Collection;
 import java.util.Map;
@@ -66,7 +67,7 @@ public abstract class ActionType {
             Validate.notNull(player);
 
             String string = String.join(" ", args);
-            Bukkit.getScheduler().runTask(DECENT_HOLOGRAMS.getPlugin(), () -> {
+            FoliaUtil.scheduler.runTask(player, () -> {
                 //
                 player.chat(PAPI.setPlaceholders(player, string.replace("{player}", player.getName())));
             });
@@ -80,7 +81,7 @@ public abstract class ActionType {
             Validate.notNull(player);
 
             String string = String.join(" ", args);
-            Bukkit.getScheduler().runTask(DECENT_HOLOGRAMS.getPlugin(), () -> {
+            FoliaUtil.scheduler.runTask(player, () -> {
                 //
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), PAPI.setPlaceholders(player, string.replace("{player}", player.getName())));
             });
@@ -113,7 +114,7 @@ public abstract class ActionType {
             if (location == null) {
                 return false;
             }
-            Bukkit.getScheduler().runTask(DECENT_HOLOGRAMS.getPlugin(), () -> player.teleport(location));
+            player.teleportAsync(location);
             return true;
         }
     };

@@ -6,6 +6,8 @@ import eu.decentsoftware.holograms.api.utils.DExecutor;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.scheduler.BukkitTask;
+import org.tjdev.util.tjpluginutil.spigot.FoliaUtil;
+import org.tjdev.util.tjpluginutil.spigot.scheduler.universalscheduler.scheduling.tasks.MyScheduledTask;
 
 public class S {
 
@@ -13,10 +15,6 @@ public class S {
 
     public static void stopTask(int id) {
         Bukkit.getScheduler().cancelTask(id);
-    }
-
-    public static void sync(Runnable runnable) {
-        Bukkit.getScheduler().runTask(DECENT_HOLOGRAMS.getPlugin(), runnable);
     }
 
     public static BukkitTask sync(Runnable runnable, long delay) {
@@ -29,7 +27,7 @@ public class S {
 
     public static void async(Runnable runnable) {
         try {
-            Bukkit.getScheduler().runTaskAsynchronously(DECENT_HOLOGRAMS.getPlugin(), runnable);
+            FoliaUtil.scheduler.runTaskAsynchronously(runnable);
         } catch (IllegalPluginAccessException e) {
             DExecutor.execute(runnable);
         }
@@ -37,7 +35,7 @@ public class S {
 
     public static void async(Runnable runnable, long delay) {
         try {
-            Bukkit.getScheduler().runTaskLaterAsynchronously(DECENT_HOLOGRAMS.getPlugin(), runnable, delay);
+            FoliaUtil.scheduler.runTaskLaterAsynchronously(runnable, delay);
         } catch (IllegalPluginAccessException e) {
             DExecutor.execute(runnable);
         }
@@ -47,8 +45,8 @@ public class S {
         return Bukkit.getScheduler().runTaskTimerAsynchronously(DECENT_HOLOGRAMS.getPlugin(), runnable, 0, interval);
     }
 
-    public static BukkitTask asyncTask(Runnable runnable, long interval, long delay) {
-        return Bukkit.getScheduler().runTaskTimerAsynchronously(DECENT_HOLOGRAMS.getPlugin(), runnable, delay, interval);
+    public static MyScheduledTask asyncTask(Runnable runnable, long interval, long delay) {
+        return FoliaUtil.scheduler.runTaskTimerAsynchronously(runnable, delay, interval);
     }
 
 }
