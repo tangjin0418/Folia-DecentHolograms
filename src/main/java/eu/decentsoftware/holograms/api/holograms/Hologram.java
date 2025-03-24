@@ -98,107 +98,115 @@ public class Hologram extends UpdatingHologramObject implements ITicked {
     @SuppressWarnings("unchecked")
     @NonNull
     public static Hologram fromFile(final @NotNull String filePath) throws LocationParseException, IllegalArgumentException {
-        final FileConfig config = new FileConfig(DECENT_HOLOGRAMS.getPlugin(), "holograms/" + filePath);
-        final String fileName = new File(filePath).getName();
+        Hologram hologram = null;
+        try {
+            final FileConfig config = new FileConfig(DECENT_HOLOGRAMS.getPlugin(), "holograms/" + filePath);
+            final String fileName = new File(filePath).getName();
 
-        // Parse hologram name
-        String name;
-        if (fileName.toLowerCase().startsWith("hologram_") && fileName.length() > "hologram_".length()) {
-            name = fileName.substring("hologram_".length(), fileName.length() - 4);
-        } else {
-            name = fileName.substring(0, fileName.length() - 4);
-        }
-
-        if (name.isEmpty()) {
-            // This shouldn't happen when loading holograms from files.
-            throw new IllegalArgumentException("Hologram name cannot be null or empty.");
-        }
-
-        if (Hologram.getCachedHologramNames().contains(name)) {
-            throw new IllegalArgumentException("Hologram with name '" + name + "' already exists.");
-        }
-
-        // Get hologram location
-        String locationString = config.getString("location");
-        Location location = LocationUtils.asLocationE(locationString);
-
-        boolean enabled = true;
-        if (config.isBoolean("enabled")) {
-            enabled = config.getBoolean("enabled");
-        }
-
-        Hologram hologram = new Hologram(name, location, config, enabled);
-        if (config.isString("permission")) {
-            hologram.setPermission(config.getString("permission"));
-        }
-        hologram.setDisplayRange(config.getInt("display-range", Settings.DEFAULT_DISPLAY_RANGE));
-        hologram.setUpdateRange(config.getInt("update-range", Settings.DEFAULT_UPDATE_RANGE));
-        hologram.setUpdateInterval(config.getInt("update-interval", Settings.DEFAULT_UPDATE_INTERVAL));
-        hologram.addFlags(config.getStringList("flags").stream().map(EnumFlag::valueOf).toArray(EnumFlag[]::new));
-        if (config.isBoolean("down-origin")) {
-            hologram.setDownOrigin(config.getBoolean("down-origin", Settings.DEFAULT_DOWN_ORIGIN));
-        }
-
-        if (!config.contains("pages") && config.contains("lines")) {
-            // Old Config
-            HologramPage page = hologram.getPage(0);
-            Set<String> keysLines = config.getConfigurationSection("lines").getKeys(false);
-            for (int j = 1; j <= keysLines.size(); j++) {
-                String path = "lines." + j;
-                HologramLine line = HologramLine.fromFile(config.getConfigurationSection(path), page, page.getNextLineLocation());
-                page.addLine(line);
-            }
-            config.set("lines", null);
-            hologram.save();
-            return hologram;
-        }
-
-        // New Config
-        boolean firstPage = true;
-        for (Map<?, ?> map : config.getMapList("pages")) {
-            HologramPage page;
-            if (firstPage) {
-                page = hologram.getPage(0);
-                firstPage = false;
+            // Parse hologram name
+            String name;
+            if (fileName.toLowerCase().startsWith("hologram_") && fileName.length() > "hologram_".length()) {
+                name = fileName.substring("hologram_".length(), fileName.length() - 4);
             } else {
-                page = hologram.addPage();
+                name = fileName.substring(0, fileName.length() - 4);
             }
 
-            // Load click actions
-            if (map.containsKey("actions")) {
-                Map<String, List<String>> actionsMap = (Map<String, List<String>>) map.get("actions");
-                for (ClickType clickType : ClickType.values()) {
-                    if (actionsMap.containsKey(clickType.name())) {
-                        List<String> clickTypeActions = actionsMap.get(clickType.name());
-                        for (String clickTypeAction : clickTypeActions) {
-                            try {
-                                page.addAction(clickType, new Action(clickTypeAction));
-                            } catch (Exception e) {
-                                Log.warn("Failed to parse action '%s' for hologram '%s' at page %s! Skipping...",
-                                        e, clickTypeAction, hologram.getName(), page.getIndex());
+            if (name.isEmpty()) {
+                // This shouldn't happen when loading holograms from files.
+                throw new IllegalArgumentException("Hologram name cannot be null or empty.");
+            }
+
+            if (Hologram.getCachedHologramNames().contains(name)) {
+                throw new IllegalArgumentException("Hologram with name '" + name + "' already exists.");
+            }
+
+            // Get hologram location
+            String locationString = config.getString("location");
+            Location location = LocationUtils.asLocationE(locationString);
+
+            boolean enabled = true;
+            if (config.isBoolean("enabled")) {
+                enabled = config.getBoolean("enabled");
+            }
+
+            hologram = new Hologram(name, location, config, enabled);
+            if (config.isString("permission")) {
+                hologram.setPermission(config.getString("permission"));
+            }
+            hologram.setDisplayRange(config.getInt("display-range", Settings.DEFAULT_DISPLAY_RANGE));
+            hologram.setUpdateRange(config.getInt("update-range", Settings.DEFAULT_UPDATE_RANGE));
+            hologram.setUpdateInterval(config.getInt("update-interval", Settings.DEFAULT_UPDATE_INTERVAL));
+            hologram.addFlags(config.getStringList("flags").stream().map(EnumFlag::valueOf).toArray(EnumFlag[]::new));
+            if (config.isBoolean("down-origin")) {
+                hologram.setDownOrigin(config.getBoolean("down-origin", Settings.DEFAULT_DOWN_ORIGIN));
+            }
+
+            if (!config.contains("pages") && config.contains("lines")) {
+                // Old Config
+                HologramPage page = hologram.getPage(0);
+                Set<String> keysLines = config.getConfigurationSection("lines").getKeys(false);
+                for (int j = 1; j <= keysLines.size(); j++) {
+                    String path = "lines." + j;
+                    HologramLine line = HologramLine.fromFile(config.getConfigurationSection(path), page, page.getNextLineLocation());
+                    page.addLine(line);
+                }
+                config.set("lines", null);
+                hologram.save();
+                return hologram;
+            }
+
+            // New Config
+            boolean firstPage = true;
+            for (Map<?, ?> map : config.getMapList("pages")) {
+                HologramPage page;
+                if (firstPage) {
+                    page = hologram.getPage(0);
+                    firstPage = false;
+                } else {
+                    page = hologram.addPage();
+                }
+
+                // Load click actions
+                if (map.containsKey("actions")) {
+                    Map<String, List<String>> actionsMap = (Map<String, List<String>>) map.get("actions");
+                    for (ClickType clickType : ClickType.values()) {
+                        if (actionsMap.containsKey(clickType.name())) {
+                            List<String> clickTypeActions = actionsMap.get(clickType.name());
+                            for (String clickTypeAction : clickTypeActions) {
+                                try {
+                                    page.addAction(clickType, new Action(clickTypeAction));
+                                } catch (Exception e) {
+                                    Log.warn("Failed to parse action '%s' for hologram '%s' at page %s! Skipping...",
+                                            e, clickTypeAction, hologram.getName(), page.getIndex());
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // Load lines
-            if (map.containsKey("lines")) {
-                for (Map<?, ?> lineMap : (List<Map<?, ?>>) map.get("lines")) {
-                    Map<String, Object> values = null;
-                    try {
-                        values = (Map<String, Object>) lineMap;
-                    } catch (Exception ignored) {
-                        // Ignore
+                // Load lines
+                if (map.containsKey("lines")) {
+                    for (Map<?, ?> lineMap : (List<Map<?, ?>>) map.get("lines")) {
+                        Map<String, Object> values = null;
+                        try {
+                            values = (Map<String, Object>) lineMap;
+                        } catch (Exception ignored) {
+                            // Ignore
+                        }
+                        if (values == null) continue;
+                        HologramLine line = HologramLine.fromMap(values, page, page.getNextLineLocation());
+                        page.addLine(line);
                     }
-                    if (values == null) continue;
-                    HologramLine line = HologramLine.fromMap(values, page, page.getNextLineLocation());
-                    page.addLine(line);
                 }
             }
+            hologram.setFacing((float) config.getDouble("facing", 0.0f));
+            return hologram;
+        } catch (Exception e) {
+            if (hologram != null) {
+                hologram.destroy();
+            }
+            throw e;
         }
-        hologram.setFacing((float) config.getDouble("facing", 0.0f));
-        return hologram;
     }
 
     /*
@@ -259,6 +267,22 @@ public class Hologram extends UpdatingHologramObject implements ITicked {
     }
 
     /**
+     * Creates a FileConfig if saveToFile is set to true
+     *
+     * @param saveToFile Whether the hologram should be saved to a file.
+     * @param name       The name of the hologram.
+     * @return
+     */
+    private static @Nullable FileConfig createConfig(final boolean saveToFile, final String name) {
+        FileConfig conf = null;
+
+        if (saveToFile)
+            conf = new FileConfig(DECENT_HOLOGRAMS.getPlugin(), String.format("holograms/%s.yml", name));
+
+        return conf;
+    }
+
+    /**
      * Creates a new hologram with the given name and location.
      *
      * @param name       The name of the hologram.
@@ -267,7 +291,7 @@ public class Hologram extends UpdatingHologramObject implements ITicked {
      * @see eu.decentsoftware.holograms.api.DHAPI#createHologram(String, Location, boolean)
      */
     public Hologram(@NonNull String name, @NonNull Location location, boolean saveToFile) {
-        this(name, location, saveToFile ? new FileConfig(DECENT_HOLOGRAMS.getPlugin(), String.format("holograms/%s.yml", name)) : null);
+        this(name, location, createConfig(saveToFile, name), true, saveToFile);
     }
 
     /**
@@ -277,7 +301,7 @@ public class Hologram extends UpdatingHologramObject implements ITicked {
      * @param location The location of the hologram.
      * @param config   The config of the hologram.
      */
-    public Hologram(@NonNull String name, @NonNull Location location, @Nullable FileConfig config) {
+    public Hologram(@NonNull String name, @NonNull Location location, @NonNull FileConfig config) {
         this(name, location, config, true);
     }
 
@@ -289,12 +313,25 @@ public class Hologram extends UpdatingHologramObject implements ITicked {
      * @param config   The config of the hologram.
      * @param enabled  Whether the hologram should be enabled.
      */
-    public Hologram(@NonNull String name, @NonNull Location location, @Nullable FileConfig config, boolean enabled) {
+    public Hologram(@NonNull String name, @NonNull Location location, @NonNull FileConfig config, boolean enabled) {
+        this(name, location, config, enabled, true);
+    }
+
+    /**
+     * Creates a new Hologram with the given parameters.
+     *
+     * @param name       The name of the hologram.
+     * @param location   The location of the hologram.
+     * @param config     The config of the hologram.
+     * @param enabled    Whether the hologram should be enabled.
+     * @param saveToFile Whether the hologram should be saved to a file.
+     */
+    public Hologram(@NonNull String name, @NonNull Location location, @Nullable FileConfig config, boolean enabled, boolean saveToFile) {
         super(location);
-        this.name = name;
         this.config = config;
         this.enabled = enabled;
-        this.saveToFile = this.config != null;
+        this.name = name;
+        this.saveToFile = saveToFile;
         this.tickCounter = new AtomicInteger();
         this.addPage();
         this.register();
@@ -347,9 +384,9 @@ public class Hologram extends UpdatingHologramObject implements ITicked {
     @Override
     public void delete() {
         super.delete();
-        if (config != null) {
+
+        if (config != null)
             config.delete();
-        }
     }
 
     /**
