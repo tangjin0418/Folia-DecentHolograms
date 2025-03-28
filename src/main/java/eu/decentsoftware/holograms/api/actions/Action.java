@@ -3,7 +3,7 @@ package eu.decentsoftware.holograms.api.actions;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-ximport org.bukkit.entity.Player;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
